@@ -11,7 +11,7 @@ const App = () => {
 ///////// ~~~~~~~~~~~~~~~ need to change get route ~~~~~~~~~ /////////
     useEffect(() => {
         axios
-            .get('http://localhost:3000/projects')
+            .get('http://localhost:5165/projects')
             .then((response) => {
                 setProjects(response.data)
             })
@@ -31,14 +31,14 @@ const App = () => {
 
         ///////// ~~~~~~~~~~~~~~~ need to change post route ~~~~~~~~~ /////////
         axios.post(
-            'http://localhost:3000/projects',
+            'http://localhost:5165/projects',
             {
                 name:newName,
                 description:newDescription
             }
         ).then(() => {
             axios
-                .get('http://localhost:3000/projects')
+                .get('http://localhost:5165/projects')
                 .then((response) => {
                     setProjects(response.data)
                 })
@@ -47,10 +47,10 @@ const App = () => {
 
     const handleDelete = (projectData) => {
         axios
-            .delete(`http://localhost:3000/projects/${projectData._id}`)
+            .delete(`http://localhost:5165/projects/${projectData._id}`)
             .then(() => {
                 axios
-                    .get('http://localhost:3000/projects')
+                    .get('http://localhost:5165/projects')
                     .then((response) => {
                         setProjects(response.data)
                     })
