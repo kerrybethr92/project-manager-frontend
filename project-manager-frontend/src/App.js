@@ -1,48 +1,87 @@
-import logo from './logo.svg';
 import './App.css';
 import {useState, useEffect} from 'react';
 import axios from 'axios';
+
+import Banner from './components/Banner'
+import NavBar from './components/NavBar'
+import Card from './components/Card'
+import ProjectPage from './components/ProjectPage'
+import NewProject from './components/NewProject'
+import EditProject from './components/EditProject'
 
 const App = () => {
 
     const [newName, setNewName] = useState('')
     const [newDescription, setNewDescription] = useState('')
+    const [newPhoto, setNewPhoto] = useState('') //// put a default image url
+    const [newIsComplete, setNewIsComplete] = useState(false)
+    const [newWears, setNewWears] = useState(0)
     const [projects, setProjects] = useState([]);
-///////// ~~~~~~~~~~~~~~~ need to change get route ~~~~~~~~~ /////////
+
+    const [selectedProject, setSelectedProject] = useState({})
+    const [currentPage, setCurrentPage] = useState('projectsIndex')
+
     useEffect(() => {
         axios
-            .get('http://localhost:5165/projects')
+            .get('http://localhost:5165/projectitems')
             .then((response) => {
                 setProjects(response.data)
             })
     },[])
 
     const handleNewNameChange = (event) => {
-
         setNewName(event.target.value);
     }
 
     const handleNewDescriptionChange = (event) => {
         setNewDescription(event.target.value);
+        console.log(newDescription);
     }
-    // form handler
+
+    const handleNewCompletionChange = (event) => {
+        setNewIsComplete(event.target.checked)
+    }
+
+    const handleNewPhotoChange = (event) => {
+        setNewPhoto(event.target.value);
+    }
+    // form handlers
     const handleNewProjectFormSubmit = (event) => {
         event.preventDefault();
 
-        ///////// ~~~~~~~~~~~~~~~ need to change post route ~~~~~~~~~ /////////
         axios.post(
-            'http://localhost:5165/projects',
+            'http://localhost:5165/projectitems',
             {
                 name:newName,
                 description:newDescription
             }
         ).then(() => {
             axios
-                .get('http://localhost:5165/projects')
+                .get('http://localhost:5165/projectitems')
                 .then((response) => {
                     setProjects(response.data)
                 })
         })
+    }
+
+    // edit form handler
+    const handleEditProjectFormSubmit = (event, entryData) => {
+        event.preventDefault();
+        axios
+            .put(
+                `http://localhost:5165/projectitems/${entryData.id}`,
+                {
+                    name:newName || entryData.name,
+                    description:newDescription || entryData.description,
+                    isComplete:entryData.isComplete.checked,
+                    wears:newWears || entryData.wears,
+                    photo:newPhoto || entryData.photo
+                }
+            ).then((response) => {
+                setCurrentPage("projectPage")
+                axios
+                    .get(`http://localhost:5165/projectitems/${entryData.id}`)
+            })
     }
 
     const handleDelete = (projectData) => {
@@ -54,6 +93,25 @@ const App = () => {
                     .then((response) => {
                         setProjects(response.data)
                     })
+            })
+    }
+
+    const handleShowProject = (id) => {
+        axios
+            .get(`http://localhost:5165/projectitems/${id}`)
+            .then((response) => {
+                setSelectedProject(response.data)
+                setCurrentPage('projectPage')
+            })
+    }
+
+    const handleShowEditPage = (event, id) => {
+        event.stopPropagation()
+        axios
+            .get(`http://localhost:5165/projectitems/${id}`)
+            .then((response) => {
+                setSelectedProject(response.data)
+                setCurrentPage('editProject')
             })
     }
 
@@ -74,33 +132,47 @@ const App = () => {
     //                 })
     //         })
     // }
+    console.log(currentPage);
 
     return (
-        <main>
-            <h1>Projects List</h1>
-            <section>
-                <h2>Create a Project</h2>
-                <form>
-                    Name: <input type="text" onChange={handleNewNameChange}/><br/>
-                    Description: <input type="text" onChange={handleNewDescriptionChange}/><br/>
-                    <input type="submit" value="Create Project"/>
-                </form>
-            </section>
-            <section>
-                <h2>Projects</h2>
-                <ul>
-                    {
-                        projects.map((project)=>{
-                            return <li key={project._id}> // add an onClick to open modal or something //
-                                <b>project.name</b> <br />
-                                project.description
-                                <button onClick={()=> {handleDelete(project)}}>Delete</button>
-                            </li>
-                        })
-                    }
-                </ul>
-            </section>
-        </main>
+        <>
+            <Banner/>
+            <NavBar
+                setCurrentPage={setCurrentPage}/>
+            <main>
+                {currentPage === 'projectsIndex' &&
+                    <section id="cardContainer">
+                        {
+                            projects.map((project) => {
+                                return <Card project={project} handleShowProject={handleShowProject} handleDelete={handleDelete}
+                                handleShowEditPage={handleShowEditPage} />
+                            })
+                        }
+                    </section>
+                }
+                {currentPage === 'projectPage' &&
+                    <ProjectPage
+                        project={selectedProject}/>
+                }
+                {currentPage === 'newProject' &&
+                    <NewProject
+                        handleNewProjectFormSubmit={handleNewProjectFormSubmit}
+                        handleNewNameChange={handleNewNameChange}
+                        handleNewDescriptionChange={handleNewDescriptionChange}
+                        handleNewCompletionChange={handleNewCompletionChange}
+                        handleNewPhotoChange={handleNewPhotoChange}/>
+                }
+                {currentPage === 'editProject' &&
+                    <EditProject
+                        project={selectedProject}
+                        handleEditProjectFormSubmit={handleEditProjectFormSubmit}
+                        handleNewNameChange={handleNewNameChange}
+                        handleNewDescriptionChange={handleNewDescriptionChange}
+                        handleNewCompletionChange={handleNewCompletionChange}
+                        handleNewPhotoChange={handleNewPhotoChange} />
+                }
+            </main>
+        </>
     );
 }
 
