@@ -4,18 +4,18 @@
 This single page app allows the user to keep track of clothes and costumes they make or own and how often the clothes get worn.
 
 ## Technologies Used
--C#
--dotnet
--CSS
--JavaScript
--React
+- C#
+- dotnet
+- CSS
+- JavaScript
+- React
 
 ## Approach
   1. Create an API for the app using C# backend
   1. Implement React frontend to make API calls and make information user-friendly
 
 ## Link to Live Site
--pending
+- pending
 
 ## Struggles
 I got very discouraged when I ran into some issues with the current version of .NET, which I didn't manage well. When I got that working, I ran into more issues getting the app deployed to Azure, so I decided to present on my localhost.
